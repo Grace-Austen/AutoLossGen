@@ -9,6 +9,7 @@ import numpy as np
 import os
 import copy
 from sklearn.metrics import roc_auc_score, precision_recall_curve, roc_curve, accuracy_score
+from ..models.RankNet import RankNet
 
 class BaseRunner(object):
 	@staticmethod
@@ -139,7 +140,11 @@ class BaseRunner(object):
 			output_dict = model(batch)
 			loss = output_dict['loss'] + model.l2() * self.l2_weight
 			if loss_fun is not None and sample_arc is not None:
-				loss = loss_fun(output_dict['prediction'], batch['Y'], sample_arc)
+				if isinstance(model, RankNet):
+					prediction, y = RankNet.generate_pairs(output_dict['prediction'], batch['Y'])
+					loss = loss_fun(prediction, y, sample_arc)
+				else:
+					loss = loss_fun(output_dict['prediction'], batch['Y'], sample_arc)
 				if regularizer:
 					loss += model.l2() * self.l2_weight
 			loss.backward()
