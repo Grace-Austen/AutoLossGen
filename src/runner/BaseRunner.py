@@ -9,7 +9,7 @@ import numpy as np
 import os
 import copy
 from sklearn.metrics import roc_auc_score, precision_recall_curve, roc_curve, accuracy_score
-from ..models.RankNet import RankNet
+from models.RankNet import RankNet
 
 class BaseRunner(object):
 	@staticmethod

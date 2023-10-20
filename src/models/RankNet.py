@@ -8,6 +8,8 @@ from sklearn.metrics import *
 from itertools import product
 
 
+import logging
+
 class RankNet(nn.Module):
 	append_id = True
 	include_id = False
@@ -53,6 +55,9 @@ class RankNet(nn.Module):
 	
 	@staticmethod
 	def generate_pairs(pred, y):
+		pred = torch.flatten(pred)
+		y = torch.flatten(pred)
+
 		# generate every pair of indices
 		data_pairs = list(product(range(len(y)), repeat=2))
 
@@ -60,11 +65,12 @@ class RankNet(nn.Module):
 		pred_pairs = pred[data_pairs]
 
 		# calculate reletaive relevance of pairs
-		true_diffs = true_pairs[:, 0, :] - true_pairs[:, 1, :]
-		pred_diffs = pred_pairs[:, 0, :] - pred_pairs[:, 1, :]
+		true_diffs = true_pairs[:, 0] - true_pairs[:, 1]
+		pred_diffs = pred_pairs[:, 0] - pred_pairs[:, 1]
+
 		return [pred_diffs, true_diffs]
 
-	def __init__(self, user_num, item_num, u_vector_size, i_vector_size, model_path, smooth_coef=0.1, loss_func='BCE'):
+	def __init__(self, user_num, item_num, u_vector_size, i_vector_size, model_path, smooth_coef=0.1, layers=None, loss_func='BCE'):
 		super(RankNet, self).__init__()
 		self.u_vector_size, self.i_vector_size = u_vector_size, i_vector_size
 		assert self.u_vector_size == self.i_vector_size
@@ -103,7 +109,7 @@ class RankNet(nn.Module):
 		if 'mse' in self.loss_func:
 			loss = torch.nn.MSELoss(reduction='mean')(pred, y)
 		elif 'bce' in self.loss_func:
-			loss = torch.nn.BCELoss(reduction='mean')(pred, y)
+			loss = torch.nn.BCEWithLogitsLoss(reduction='mean')(pred, y)
 		elif 'hinge' in self.loss_func:
 			loss = torch.nn.HingeEmbeddingLoss(reduction='mean')(out_dict['hinge_pred'], 1 - y * 2)
 		elif 'focal' in self.loss_func:
