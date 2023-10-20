@@ -1,0 +1,1 @@
+python run_ranknet.py --epoch 10 --child_num_branches 9 --child_num_layers 10 --search_loss --gpu 0 --sample_branch_id --sample_skip_id --controller_num_aggregate 10 --controller_train_steps 10 --log_file ../log/log_0.txt --formula_path ../model/Formula_0.txt --train_with_optim --dataset ml100k01-1-5 --model_name RankNet --random_seed 42
