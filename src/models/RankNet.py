@@ -123,6 +123,8 @@ class RankNet(nn.Module):
 			loss = torch.mean((y + pred + self.smooth_coef) / (self.smooth_coef + pred * y))
 		elif 'logmin' in self.loss_func:
 			loss = torch.mean(torch.log(torch.ones_like(pred) / (torch.min(y, pred) + self.smooth_coef) + self.smooth_coef) * (torch.min(y, pred) + y + pred))
+		elif 'predpredlabel':
+			loss = torch.mean(pred*(pred+y))
 		else:
 			print('NO PRE-DEFINED LOSS ERROR!')
 			exit(0)
